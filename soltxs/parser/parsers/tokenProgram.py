@@ -1,3 +1,4 @@
+from collections import defaultdict
 from dataclasses import dataclass
 from typing import List, Optional, Union
 
@@ -48,16 +49,14 @@ class _TokenProgramParser(Program[ParsedInstructions]):
         self.desc_map = {
             1: self.process_InitAccount,
             3: self.process_Transfer,
-            9: self.process_Unknown,
             12: self.process_TransferChecked,
+            "default": self.process_Unknown,
         }
 
     def route_instruction(self, tx: Transaction, instr_dict: dict) -> ParsedInstructions:
         raw_data = base58.decode(instr_dict["data"])
         descriminator = self.desc(raw_data)
-        parser_func = self.desc_map.get(descriminator)
-        if not parser_func:
-            raise NotImplementedError(f"Unknown {self.__class__.__name__} descriminator: {descriminator}")
+        parser_func = self.desc_map.get(descriminator, self.desc_map.get("default"))
         return parser_func(
             tx=tx,
             instruction_index=None,

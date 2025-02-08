@@ -13,7 +13,7 @@ class Unknown(ParsedInstruction):
 ParsedInstructions = Union[Unknown]
 
 
-class _UnknownParser(Program):
+class UnknownParser(Program):
     def __init__(self, program_id: str):
         self.program_id = program_id
         self.program_name = "Unknown"
@@ -33,6 +33,3 @@ class _UnknownParser(Program):
             instruction_name="Unknown",
             instruction_index=instruction_index,
         )
-
-
-UnknownProgramParser = _UnknownParser("Unknown")

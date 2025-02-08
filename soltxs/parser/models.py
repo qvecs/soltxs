@@ -48,7 +48,7 @@ class Program(abc.ABC, Generic[T]):
 
         decoded_data = base58.decode(instr.data)
         descriminator = self.desc(decoded_data)
-        parser = self.desc_map.get(descriminator)
+        parser = self.desc_map.get(descriminator, self.desc_map.get("default"))
         if not parser:
             raise NotImplementedError(f"Unknown {self.__class__.__name__} descriminator: {descriminator}")
 
