@@ -37,8 +37,8 @@ def test_enrichment_platform_identifier():
     result = PlatformIdentifierAddon.enrich(tx)
     # The current enrich method returns a dict if found or None.
     assert result is not None, "Expected to find a platform match"
-    assert result["name"] == "BullX"
-    assert result["address"] == "9RYJ3qr5eU5xAooqVcbmdeusjcViL5Nkiq7Gske3tiKq"
+    assert result.name == "BullX"
+    assert result.address == "9RYJ3qr5eU5xAooqVcbmdeusjcViL5Nkiq7Gske3tiKq"
 
 
 def test_enrichment_platform_not_found():
