@@ -14,7 +14,7 @@ class ParsedInstruction:
     Base class for a parsed instruction.
 
     Attributes:
-        program_id: The program ID that processed the instruction.
+        program_id: The program id that processed the instruction.
         program_name: The name of the program.
         instruction_name: The specific instruction name.
     """
@@ -41,19 +41,18 @@ class Program(abc.ABC, Generic[T]):
     program_id: str
     program_name: str
 
-    # Discriminator extraction function.
+    # Function to extract a discriminator from instruction data.
     desc: callable
     desc_map: Dict[bytes | int, callable]
 
     def route(self, tx: Transaction, instruction_index: int) -> T:
         """
-        Route the instruction to the correct parser based on the discriminator.
+        Routes the instruction to the correct parser based on the discriminator.
 
-        Notes:
-            The discriminator is extracted from the instruction data using the 'desc'
-            function. This value is then used to select the appropriate parser from
-            'desc_map'. If no parser is found for the discriminator, a NotImplementedError
-            is raised.
+        The discriminator is extracted from the instruction data using the 'desc'
+        function. This value is then used to select the appropriate parser from
+        'desc_map'. If no parser is found for the discriminator, a NotImplementedError
+        is raised.
 
         Args:
             tx: The Transaction object.
@@ -67,6 +66,7 @@ class Program(abc.ABC, Generic[T]):
         """
         instr: Instruction = tx.message.instructions[instruction_index]
 
+        # Decode the instruction data (base58-decoded).
         decoded_data = base58.decode(instr.data or "")
         discriminator = self.desc(decoded_data)
         parser_func = self.desc_map.get(discriminator, self.desc_map.get("default"))
@@ -75,9 +75,13 @@ class Program(abc.ABC, Generic[T]):
 
         return parser_func(tx, instruction_index, decoded_data)
 
+
 class Addon(abc.ABC):
     """
     Abstract base class for addon enrichers.
+
+    Attributes:
+        addon_name: The name of the addon.
     """
 
     addon_name: str
@@ -85,12 +89,11 @@ class Addon(abc.ABC):
     @abstractmethod
     def enrich(self, tx: Transaction) -> Optional[Dict[str, Any]]:
         """
-        Enriches the given transaction and returns a dictionary of extra data.
-        If no enrichment is available, return None.
+        Enriches the given transaction and returns extra data.
 
         Args:
             tx: The normalized Transaction object.
 
         Returns:
-            A dictionary with enrichment data or None.
+            A dictionary with enrichment data or None if no enrichment is available.
         """

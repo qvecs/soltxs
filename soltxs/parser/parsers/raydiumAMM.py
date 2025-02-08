@@ -48,6 +48,7 @@ class _RaydiumAMMParser(Program[ParsedInstructions]):
     def __init__(self):
         self.program_id = "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
         self.program_name = "RaydiumAMM"
+        # Use the first byte of the decoded data as the discriminator.
         self.desc = lambda d: d[0]
         self.desc_map = {9: self.process_Swap}
 
@@ -62,8 +63,8 @@ class _RaydiumAMMParser(Program[ParsedInstructions]):
 
         Args:
             tx: The Transaction object.
-            instruction_index: Index of the instruction.
-            decoded_data: Decoded instruction data.
+            instruction_index: The index of the instruction.
+            decoded_data: Decoded instruction data (re-decoded from instruction data).
 
         Returns:
             A Swap parsed instruction.
@@ -72,17 +73,18 @@ class _RaydiumAMMParser(Program[ParsedInstructions]):
         instr: Instruction = tx.message.instructions[instruction_index]
         accounts = instr.accounts
 
-        # Decode instruction data; fallback to empty string if missing.
+        # Re-decode the instruction data (to ensure consistency) using base58.
         decoded_data = base58.decode(instr.data or "")
+        # Extract the input amount and minimum output amount.
         amount_in = int.from_bytes(decoded_data[1:9], byteorder="little", signed=False)
         minimum_amount_out = int.from_bytes(decoded_data[9:17], byteorder="little", signed=False)
 
-        # Identify user accounts based on positions.
+        # Identify the user accounts based on positions.
         user_source = tx.all_accounts[accounts[-3]]
         user_destination = tx.all_accounts[accounts[-2]]
         who = tx.all_accounts[accounts[-1]]
 
-        # Default token info.
+        # Default token info (assumed to be SOL/WSOL).
         from_token = WSOL_MINT
         from_token_decimals = SOL_DECIMALS
         to_token = WSOL_MINT
@@ -104,16 +106,16 @@ class _RaydiumAMMParser(Program[ParsedInstructions]):
 
         to_token_amount = 0
         inner_instrs = []
-        # Find inner instructions corresponding to this instruction.
+        # Find inner instructions corresponding to this instruction index.
         for i_group in tx.meta.innerInstructions:
-            if i_group["index"] == instruction_index:
+            if i_group.get("index") == instruction_index:
                 inner_instrs.extend(i_group["instructions"])
                 break
 
         # Process inner instructions for token transfers.
         for in_instr in inner_instrs:
-            program_id = tx.all_accounts[in_instr["programIdIndex"]]
-            if program_id == TokenProgramParser.program_id:
+            prog_id = tx.all_accounts[in_instr["programIdIndex"]]
+            if prog_id == TokenProgramParser.program_id:
                 action = TokenProgramParser.route_instruction(tx, in_instr)
                 if action.instruction_name in ["Transfer", "TransferChecked"] and action.to == user_destination:
                     to_token_amount = action.amount
