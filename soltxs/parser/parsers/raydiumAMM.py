@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 from typing import Union
 
-from soltxs.parser.parsers.tokenProgram import TokenProgramParser
+import qbase58 as base58
+
 from soltxs.normalizer.models import Instruction, Transaction
 from soltxs.parser.models import ParsedInstruction, Program
+from soltxs.parser.parsers.tokenProgram import TokenProgramParser
 
 WSOL_MINT = "So11111111111111111111111111111111111111112"
 SOL_DECIMALS = 9
@@ -33,7 +35,6 @@ class _RaydiumAMMParser(Program[ParsedInstructions]):
         self.program_id = "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
         self.program_name = "RaydiumAMM"
 
-        # Descriminator information.
         self.desc = lambda d: d[0]
         self.desc_map = {9: self.process_Swap}
 
@@ -43,9 +44,12 @@ class _RaydiumAMMParser(Program[ParsedInstructions]):
         instruction_index: int,
         decoded_data: bytes,
     ) -> Swap:
+        # Retrieve the original instruction from the transaction message.
         instr: Instruction = tx.message.instructions[instruction_index]
         accounts = instr.accounts
 
+        # Safely decode the instruction data in case it is missing.
+        decoded_data = base58.decode(instr.data or "")
         amount_in = int.from_bytes(decoded_data[1:9], byteorder="little", signed=False)
         minimum_amount_out = int.from_bytes(decoded_data[9:17], byteorder="little", signed=False)
 
@@ -58,6 +62,7 @@ class _RaydiumAMMParser(Program[ParsedInstructions]):
         to_token = WSOL_MINT
         to_token_decimals = SOL_DECIMALS
 
+        # Consolidate token balances from pre and post token balances.
         combined_tb = []
         combined_tb.extend(tx.meta.preTokenBalances)
         combined_tb.extend(tx.meta.postTokenBalances)
@@ -73,11 +78,13 @@ class _RaydiumAMMParser(Program[ParsedInstructions]):
 
         to_token_amount = 0
         inner_instrs = []
+        # Search for inner instructions corresponding to the current instruction index.
         for i_group in tx.meta.innerInstructions:
             if i_group["index"] == instruction_index:
                 inner_instrs.extend(i_group["instructions"])
                 break
 
+        # Process inner instructions for token transfers.
         for in_instr in inner_instrs:
             program_id = tx.all_accounts[in_instr["programIdIndex"]]
             if program_id == TokenProgramParser.program_id:

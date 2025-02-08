@@ -12,7 +12,7 @@ class AddressTableLookup:
 @dataclass(slots=True)
 class Instruction:
     programIdIndex: int
-    data: str
+    data: Optional[str]
     accounts: List[int]
     stackHeight: Optional[int]
 

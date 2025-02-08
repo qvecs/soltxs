@@ -46,7 +46,7 @@ class Program(abc.ABC, Generic[T]):
         """
         instr: Instruction = tx.message.instructions[instruction_index]
 
-        decoded_data = base58.decode(instr.data)
+        decoded_data = base58.decode(instr.data or "")
         descriminator = self.desc(decoded_data)
         parser = self.desc_map.get(descriminator, self.desc_map.get("default"))
         if not parser:

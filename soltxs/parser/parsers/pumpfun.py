@@ -72,7 +72,7 @@ class CreateData:
 
 class _PumpFunParser(Program[ParsedInstructions]):
     """
-    Solana's Compute Budget program for adjusting compute unit limits and prices.
+    PumpFun parser for handling Buy, Sell, and Create instructions.
     """
 
     def __init__(self):
@@ -94,7 +94,6 @@ class _PumpFunParser(Program[ParsedInstructions]):
         decoded_data: bytes,
     ) -> Buy:
         swap_list = self._parse_swap(tx, instruction_index)
-
         data = swap_list[0]
         from_token = WSOL_MINT
         to_token = str(data["mint"])
@@ -124,7 +123,6 @@ class _PumpFunParser(Program[ParsedInstructions]):
         decoded_data: bytes,
     ) -> Sell:
         swap_list = self._parse_swap(tx, instruction_index)
-
         data = swap_list[0]
         from_token = str(data["mint"])
         to_token = WSOL_MINT
@@ -155,12 +153,10 @@ class _PumpFunParser(Program[ParsedInstructions]):
     ) -> Create:
         raw = decoded_data[8:]
         create_data = CreateData.decode(raw)
-
         instr: Instruction = tx.message.instructions[instruction_index]
         who = None
         if len(instr.accounts) > 7:
             who = tx.all_accounts[instr.accounts[7]]
-
         return Create(
             program_id=self.program_id,
             program_name=self.program_name,
@@ -183,9 +179,11 @@ class _PumpFunParser(Program[ParsedInstructions]):
 
         inner_instrs = []
         for group in tx.meta.innerInstructions:
-            if group["index"] == instruction_index:
+            if "index" in group:
+                if group["index"] == instruction_index:
+                    inner_instrs.extend(group["instructions"])
+            else:
                 inner_instrs.extend(group["instructions"])
-                break
 
         result_list = []
         for in_instr in inner_instrs:
@@ -193,7 +191,7 @@ class _PumpFunParser(Program[ParsedInstructions]):
             if sub_prog_id != top_prog_id:
                 continue
 
-            raw_data = base58.decode(in_instr["data"])
+            raw_data = base58.decode(in_instr.get("data", ""))
             if len(raw_data) < 16:
                 continue
 

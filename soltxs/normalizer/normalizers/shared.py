@@ -9,21 +9,15 @@ from soltxs.normalizer.models import (
 
 
 def instructions(instr: dict) -> Instruction:
-    """
-    Ensure instruction has 'accounts' and 'stackHeight'.
-    """
     return Instruction(
         programIdIndex=instr["programIdIndex"],
-        data=instr["data"],
+        data=instr.get("data", ""),
         accounts=instr.get("accounts", []),
         stackHeight=instr.get("stackHeight", None),
     )
 
 
 def address_lookup(lookup: dict) -> AddressTableLookup:
-    """
-    Ensure address table lookup has 'readonlyIndexes' and 'writableIndexes' as lists.
-    """
     return AddressTableLookup(
         accountKey=lookup["accountKey"],
         readonlyIndexes=lookup.get("readonlyIndexes", []),
@@ -32,9 +26,6 @@ def address_lookup(lookup: dict) -> AddressTableLookup:
 
 
 def token_balance(tb: dict) -> TokenBalance:
-    """
-    Convert raw dict to our TokenBalance typed dict.
-    """
     return TokenBalance(
         accountIndex=tb["accountIndex"],
         mint=tb["mint"],
