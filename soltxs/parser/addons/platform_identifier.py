@@ -1,6 +1,7 @@
-from typing import Optional, Tuple
+from typing import Any, Dict, Optional
 
 from soltxs.normalizer.models import Transaction
+from soltxs.parser.models import Addon
 
 PLATFORM = {
     "tro46jTMkb56A3wPepo5HT7JcvX9wFWvR8VaJzgdjEf": "Trojan",
@@ -9,18 +10,15 @@ PLATFORM = {
 }
 
 
-def enrich(tx: Transaction) -> Tuple[Optional[str], Optional[str]]:
-    """
-    Identifies the platform of the transaction based on known addresses.
+class _PlatformIdentifierAddon(Addon):
+    def __init__(self):
+        self.addon_name = "platform_identifier"
 
-    Args:
-        tx: The Transaction object.
+    def enrich(self, tx: Transaction) -> Optional[Dict[str, Any]]:
+        for address in tx.all_accounts:
+            if address in PLATFORM:
+                return {"address": address, "name": PLATFORM[address]}
+        return None
 
-    Returns:
-        A tuple containing the platform address and platform name if found, otherwise (None, None).
-    """
-    for address in tx.all_accounts:
-        if address in PLATFORM:
-            return address, PLATFORM[address]
 
-    return None, None
+PlatformIdentifierAddon = _PlatformIdentifierAddon()

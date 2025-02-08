@@ -1,6 +1,7 @@
 import abc
+from abc import abstractmethod
 from dataclasses import dataclass
-from typing import Dict, Generic, TypeVar
+from typing import Any, Dict, Generic, Optional, TypeVar
 
 import qbase58 as base58
 
@@ -73,3 +74,23 @@ class Program(abc.ABC, Generic[T]):
             raise NotImplementedError(f"Unknown {self.__class__.__name__} discriminator: {discriminator}")
 
         return parser_func(tx, instruction_index, decoded_data)
+
+class Addon(abc.ABC):
+    """
+    Abstract base class for addon enrichers.
+    """
+
+    addon_name: str
+
+    @abstractmethod
+    def enrich(self, tx: Transaction) -> Optional[Dict[str, Any]]:
+        """
+        Enriches the given transaction and returns a dictionary of extra data.
+        If no enrichment is available, return None.
+
+        Args:
+            tx: The normalized Transaction object.
+
+        Returns:
+            A dictionary with enrichment data or None.
+        """

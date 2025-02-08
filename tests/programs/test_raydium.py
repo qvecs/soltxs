@@ -1,4 +1,5 @@
 from dataclasses import asdict
+
 from soltxs import normalize, parse
 
 
@@ -23,9 +24,13 @@ def test_parsing(load_data):
 
     ge_parse = parse(ge_tx)
     rpc_parse = parse(rpc_tx)
-    assert ge_parse == rpc_parse
 
-    for g, r in zip(ge_parse, rpc_parse):
+    # Compare top-level fields.
+    assert ge_parse["signatures"] == rpc_parse["signatures"]
+    assert ge_parse["addons"] == rpc_parse["addons"]
+
+    # Iterate over the parsed instructions.
+    for g, r in zip(ge_parse["instructions"], rpc_parse["instructions"]):
         dg = asdict(g)
         dr = asdict(r)
         assert dg == dr

@@ -38,9 +38,8 @@ import soltxs
 
 tx = {"jsonrpc": ..., "result": ..., "id": ...}
 
-# All three steps below can be combined into a single call
-# to the 'process' function. The function below is equivalent to:
-# resolve(parse(normalize(tx)))
+# All three steps below can be combined into a single call.
+# Equivalent to: resolve(parse(normalize(tx)))
 result = soltxs.process(tx)
 
 norm_tx = soltxs.normalize(tx)
@@ -53,19 +52,29 @@ norm_tx = soltxs.normalize(tx)
 #     loadedAddresses=...,
 # )
 
-prsd_tx = soltxs.parse(norm_tx)
-# [
-#     <ComputeBudget.SetComputeUnitLimit(...)>,
-#     <ComputeBudget.SetComputeUnitPrice(...)>,
-#     <SystemProgram.CreateAccount(...)>,
-#     <TokenProgram.InitAccount(...)>,
-#     <RaydiumAMM.Swap(...)>,
-#     <TokenProgram.Unknown(...)>,
-#     <SystemProgram.Transfer(...)>,
-#     <UnknownProgram.Unknown(...)>,
-# ]
+parsed_data = soltxs.parse(norm_tx)
+# {
+#     "signatures": [...],
+#     "instructions": [
+#         <ComputeBudget.SetComputeUnitLimit(...)>,
+#         <ComputeBudget.SetComputeUnitPrice(...)>,
+#         <SystemProgram.CreateAccount(...)>,
+#         <TokenProgram.InitAccount(...)>,
+#         <RaydiumAMM.Swap(...)>,
+#         <TokenProgram.Unknown(...)>,
+#         <SystemProgram.Transfer(...)>,
+#         <UnknownProgram.Unknown(...)>,
+#     ],
+#     "addons": {
+#         {"compute_units": {...}},
+#         {"instruction_count": {...}},
+#         {"platform_identifier": {...}},
+#         {"token_transfer_summary": {...}}
+#     }
+# }
 
-rsvl_tx = soltxs.resolve(prsd_tx)
+resolved_tx = soltxs.resolve(parsed_data)
+# For example, a Raydium resolved output might be:
 # Raydium(
 #     type=...,
 #     who=...,
