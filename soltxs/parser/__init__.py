@@ -22,7 +22,7 @@ def parse(tx: Transaction) -> List[models.ParsedInstruction]:
     for idx, instruction in enumerate(tx.message.instructions):
         program_id = tx.message.accountKeys[instruction.programIdIndex]
 
-        router = id_to_handler.get(program_id, parsers.unknown.UnknownProgramParser)
+        router = id_to_handler.get(program_id, parsers.unknown.UnknownParser(program_id))
         action = router.route(tx, idx)
         actions.append(action)
 
