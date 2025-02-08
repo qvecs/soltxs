@@ -51,7 +51,7 @@ def test_resolve_no_match():
     from soltxs.parser.parsers.unknown import Unknown as UnknownInstr
     from soltxs.resolver.resolvers.unknown import Unknown as UnknownResolve
 
-    # A dummy set of instructions containing only Unknown
+    # A dummy set of instructions containing only Unknown.
     unknown_instructions = [
         UnknownInstr(
             program_id="FakeID",

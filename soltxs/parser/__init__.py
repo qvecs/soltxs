@@ -14,9 +14,14 @@ id_to_handler: Dict[str, models.Program] = {
 
 def parse(tx: Transaction) -> List[models.ParsedInstruction]:
     """
-    Parses a standardized Solana transaction object.
-    """
+    Parses a standardized Solana transaction object into a list of parsed instructions.
 
+    Args:
+        tx: The standardized Transaction object.
+
+    Returns:
+        List of parsed instructions.
+    """
     actions: List[models.ParsedInstruction] = []
 
     for idx, instruction in enumerate(tx.message.instructions):

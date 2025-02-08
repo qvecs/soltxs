@@ -13,6 +13,20 @@ SOL_DECIMALS = 9
 
 @dataclass(slots=True)
 class Swap(ParsedInstruction):
+    """
+    Parsed instruction for a Raydium AMM swap.
+
+    Attributes:
+        who: The user performing the swap.
+        from_token: The token being swapped from.
+        from_token_amount: Raw amount of the from token.
+        from_token_decimals: Decimals for the from token.
+        to_token: The token being swapped to.
+        to_token_amount: Raw amount of the to token.
+        to_token_decimals: Decimals for the to token.
+        minimum_amount_out: Minimum amount expected from the swap.
+    """
+
     who: str
     from_token: str
     from_token_amount: int
@@ -28,13 +42,12 @@ ParsedInstructions = Union[Swap]
 
 class _RaydiumAMMParser(Program[ParsedInstructions]):
     """
-    Raydium's AMM v4 program for token swaps.
+    Parser for Raydium AMM v4 token swap instructions.
     """
 
     def __init__(self):
         self.program_id = "675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8"
         self.program_name = "RaydiumAMM"
-
         self.desc = lambda d: d[0]
         self.desc_map = {9: self.process_Swap}
 
@@ -44,25 +57,38 @@ class _RaydiumAMMParser(Program[ParsedInstructions]):
         instruction_index: int,
         decoded_data: bytes,
     ) -> Swap:
-        # Retrieve the original instruction from the transaction message.
+        """
+        Processes a Swap instruction.
+
+        Args:
+            tx: The Transaction object.
+            instruction_index: Index of the instruction.
+            decoded_data: Decoded instruction data.
+
+        Returns:
+            A Swap parsed instruction.
+        """
+        # Retrieve the original instruction.
         instr: Instruction = tx.message.instructions[instruction_index]
         accounts = instr.accounts
 
-        # Safely decode the instruction data in case it is missing.
+        # Decode instruction data; fallback to empty string if missing.
         decoded_data = base58.decode(instr.data or "")
         amount_in = int.from_bytes(decoded_data[1:9], byteorder="little", signed=False)
         minimum_amount_out = int.from_bytes(decoded_data[9:17], byteorder="little", signed=False)
 
-        user_source = tx.all_accounts[accounts[len(accounts) - 3]]
-        user_destination = tx.all_accounts[accounts[len(accounts) - 2]]
-        who = tx.all_accounts[accounts[len(accounts) - 1]]
+        # Identify user accounts based on positions.
+        user_source = tx.all_accounts[accounts[-3]]
+        user_destination = tx.all_accounts[accounts[-2]]
+        who = tx.all_accounts[accounts[-1]]
 
+        # Default token info.
         from_token = WSOL_MINT
         from_token_decimals = SOL_DECIMALS
         to_token = WSOL_MINT
         to_token_decimals = SOL_DECIMALS
 
-        # Consolidate token balances from pre and post token balances.
+        # Consolidate token balances from pre and post balances.
         combined_tb = []
         combined_tb.extend(tx.meta.preTokenBalances)
         combined_tb.extend(tx.meta.postTokenBalances)
@@ -78,7 +104,7 @@ class _RaydiumAMMParser(Program[ParsedInstructions]):
 
         to_token_amount = 0
         inner_instrs = []
-        # Search for inner instructions corresponding to the current instruction index.
+        # Find inner instructions corresponding to this instruction.
         for i_group in tx.meta.innerInstructions:
             if i_group["index"] == instruction_index:
                 inner_instrs.extend(i_group["instructions"])

@@ -9,6 +9,15 @@ from soltxs.normalizer.models import (
 
 
 def instructions(instr: dict) -> Instruction:
+    """
+    Converts a raw instruction dictionary to an Instruction object.
+
+    Args:
+        instr: The raw instruction dictionary.
+
+    Returns:
+        An Instruction object.
+    """
     return Instruction(
         programIdIndex=instr["programIdIndex"],
         data=instr.get("data", ""),
@@ -18,6 +27,15 @@ def instructions(instr: dict) -> Instruction:
 
 
 def address_lookup(lookup: dict) -> AddressTableLookup:
+    """
+    Converts a raw address lookup dictionary to an AddressTableLookup object.
+
+    Args:
+        lookup: The raw lookup dictionary.
+
+    Returns:
+        An AddressTableLookup object.
+    """
     return AddressTableLookup(
         accountKey=lookup["accountKey"],
         readonlyIndexes=lookup.get("readonlyIndexes", []),
@@ -26,6 +44,15 @@ def address_lookup(lookup: dict) -> AddressTableLookup:
 
 
 def token_balance(tb: dict) -> TokenBalance:
+    """
+    Converts a raw token balance dictionary to a TokenBalance object.
+
+    Args:
+        tb: The raw token balance dictionary.
+
+    Returns:
+        A TokenBalance object.
+    """
     return TokenBalance(
         accountIndex=tb["accountIndex"],
         mint=tb["mint"],

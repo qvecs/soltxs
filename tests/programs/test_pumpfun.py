@@ -9,7 +9,7 @@ def test_equal_transaction(load_data):
     tx1 = normalize(load_data("pumpfun_buy_geyser.json"))
     tx2 = normalize(load_data("pumpfun_buy_rpc.json"))
 
-    # Geyser often lacks blockTime
+    # Geyser often lacks blockTime; normalize for comparison.
     tx1.blockTime = None
     tx2.blockTime = None
     assert tx1 == tx2

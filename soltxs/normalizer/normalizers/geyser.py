@@ -18,7 +18,7 @@ def normalize(tx: dict) -> models.Transaction:
         tx: A Geyser-style transaction response.
 
     Returns:
-        A standardized transaction.
+        A standardized Transaction object.
     """
     txn_container = tx["transaction"]
     slot = txn_container["slot"]
@@ -35,21 +35,21 @@ def normalize(tx: dict) -> models.Transaction:
         readonly=geyser_meta.get("loadedReadonlyAddresses", []),
     )
 
-    # Geyser doesn't have a block_time.
+    # Geyser doesn't provide blockTime.
     block_time = None
 
-    # Instructions
+    # Parse instructions using shared helper.
     raw_instructions = message["instructions"]
     instructions: List[models.Instruction] = [shared.instructions(i) for i in raw_instructions]
 
-    # Address Table Lookups
+    # Parse address table lookups if present.
     raw_lookups = message.get("addressTableLookups", [])
     address_table_lookups: List[models.AddressTableLookup] = [shared.address_lookup(lu) for lu in raw_lookups]
 
-    # Unify system program IDs in accountKeys
+    # Normalize program IDs in accountKeys.
     account_keys = shared.program_id(message["accountKeys"])
 
-    # Token balances
+    # Parse token balances.
     raw_pre_tb = geyser_meta.get("preTokenBalances", [])
     raw_post_tb = geyser_meta.get("postTokenBalances", [])
     pre_token_balances = [shared.token_balance(tb) for tb in raw_pre_tb]

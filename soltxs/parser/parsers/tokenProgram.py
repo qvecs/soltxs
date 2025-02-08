@@ -8,11 +8,29 @@ from soltxs.parser.models import ParsedInstruction, Program
 
 
 def decode_u64(b: bytes) -> int:
+    """
+    Decodes a little-endian unsigned 64-bit integer from bytes.
+
+    Args:
+        b: Bytes to decode.
+
+    Returns:
+        The decoded integer.
+    """
     return int.from_bytes(b, byteorder="little", signed=False)
 
 
 @dataclass(slots=True)
 class InitializeMint(ParsedInstruction):
+    """
+    Parsed instruction for initializing a mint.
+
+    Attributes:
+        decimals: Number of decimals.
+        mint_authority: Mint authority address.
+        freeze_authority: Optional freeze authority address.
+    """
+
     decimals: int
     mint_authority: str
     freeze_authority: Optional[str]
@@ -20,6 +38,16 @@ class InitializeMint(ParsedInstruction):
 
 @dataclass(slots=True)
 class InitializeAccount(ParsedInstruction):
+    """
+    Parsed instruction for initializing an account.
+
+    Attributes:
+        account: The account address.
+        mint: Mint address.
+        owner: Owner address.
+        rent_sysvar: Rent system variable address.
+    """
+
     account: str
     mint: str
     owner: str
@@ -28,12 +56,29 @@ class InitializeAccount(ParsedInstruction):
 
 @dataclass(slots=True)
 class InitializeMultisig(ParsedInstruction):
+    """
+    Parsed instruction for initializing a multisig.
+
+    Attributes:
+        m: Required number of signatures.
+        signers: List of signer addresses.
+    """
+
     m: int
     signers: List[str]
 
 
 @dataclass(slots=True)
 class Transfer(ParsedInstruction):
+    """
+    Parsed instruction for transferring tokens.
+
+    Attributes:
+        from_account: Source account address.
+        to: Destination account address.
+        amount: Amount to transfer.
+    """
+
     from_account: str
     to: str
     amount: int
@@ -41,6 +86,15 @@ class Transfer(ParsedInstruction):
 
 @dataclass(slots=True)
 class Approve(ParsedInstruction):
+    """
+    Parsed instruction for approving token spending.
+
+    Attributes:
+        source: Source account address.
+        delegate: Delegate account address.
+        amount: Amount approved.
+    """
+
     source: str
     delegate: str
     amount: int
@@ -48,11 +102,27 @@ class Approve(ParsedInstruction):
 
 @dataclass(slots=True)
 class Revoke(ParsedInstruction):
+    """
+    Parsed instruction for revoking token approval.
+
+    Attributes:
+        source: Source account address.
+    """
+
     source: str
 
 
 @dataclass(slots=True)
 class SetAuthority(ParsedInstruction):
+    """
+    Parsed instruction for setting authority.
+
+    Attributes:
+        account: The account address.
+        authority_type: Type of authority being set.
+        new_authority: Optional new authority address.
+    """
+
     account: str
     authority_type: int
     new_authority: Optional[str]
@@ -60,6 +130,15 @@ class SetAuthority(ParsedInstruction):
 
 @dataclass(slots=True)
 class MintTo(ParsedInstruction):
+    """
+    Parsed instruction for minting tokens.
+
+    Attributes:
+        mint: Mint address.
+        destination: Destination account address.
+        amount: Amount to mint.
+    """
+
     mint: str
     destination: str
     amount: int
@@ -67,6 +146,15 @@ class MintTo(ParsedInstruction):
 
 @dataclass(slots=True)
 class Burn(ParsedInstruction):
+    """
+    Parsed instruction for burning tokens.
+
+    Attributes:
+        account: Account address.
+        mint: Mint address.
+        amount: Amount to burn.
+    """
+
     account: str
     mint: str
     amount: int
@@ -74,6 +162,15 @@ class Burn(ParsedInstruction):
 
 @dataclass(slots=True)
 class CloseAccount(ParsedInstruction):
+    """
+    Parsed instruction for closing an account.
+
+    Attributes:
+        account: The account address.
+        destination: Destination account address.
+        authority: Authority address.
+    """
+
     account: str
     destination: str
     authority: str
@@ -81,6 +178,15 @@ class CloseAccount(ParsedInstruction):
 
 @dataclass(slots=True)
 class FreezeAccount(ParsedInstruction):
+    """
+    Parsed instruction for freezing an account.
+
+    Attributes:
+        account: Account address.
+        mint: Mint address.
+        freeze_authority: Freeze authority address.
+    """
+
     account: str
     mint: str
     freeze_authority: str
@@ -88,6 +194,15 @@ class FreezeAccount(ParsedInstruction):
 
 @dataclass(slots=True)
 class ThawAccount(ParsedInstruction):
+    """
+    Parsed instruction for thawing an account.
+
+    Attributes:
+        account: Account address.
+        mint: Mint address.
+        freeze_authority: Freeze authority address.
+    """
+
     account: str
     mint: str
     freeze_authority: str
@@ -95,6 +210,17 @@ class ThawAccount(ParsedInstruction):
 
 @dataclass(slots=True)
 class TransferChecked(ParsedInstruction):
+    """
+    Parsed instruction for a checked token transfer.
+
+    Attributes:
+        from_account: Source account address.
+        mint: Mint address.
+        to: Destination account address.
+        amount: Amount to transfer.
+        decimals: Number of decimals.
+    """
+
     from_account: str
     mint: str
     to: str
@@ -104,6 +230,16 @@ class TransferChecked(ParsedInstruction):
 
 @dataclass(slots=True)
 class ApproveChecked(ParsedInstruction):
+    """
+    Parsed instruction for a checked token approval.
+
+    Attributes:
+        source: Source account address.
+        delegate: Delegate account address.
+        amount: Amount approved.
+        decimals: Number of decimals.
+    """
+
     source: str
     delegate: str
     amount: int
@@ -112,6 +248,16 @@ class ApproveChecked(ParsedInstruction):
 
 @dataclass(slots=True)
 class MintToChecked(ParsedInstruction):
+    """
+    Parsed instruction for a checked minting operation.
+
+    Attributes:
+        mint: Mint address.
+        destination: Destination account address.
+        amount: Amount to mint.
+        decimals: Number of decimals.
+    """
+
     mint: str
     destination: str
     amount: int
@@ -120,6 +266,16 @@ class MintToChecked(ParsedInstruction):
 
 @dataclass(slots=True)
 class BurnChecked(ParsedInstruction):
+    """
+    Parsed instruction for a checked burn operation.
+
+    Attributes:
+        account: Account address.
+        mint: Mint address.
+        amount: Amount to burn.
+        decimals: Number of decimals.
+    """
+
     account: str
     mint: str
     amount: int
@@ -128,6 +284,10 @@ class BurnChecked(ParsedInstruction):
 
 @dataclass(slots=True)
 class Unknown(ParsedInstruction):
+    """
+    Parsed instruction for an unknown token program instruction.
+    """
+
     pass
 
 
@@ -153,10 +313,13 @@ ParsedInstructions = Union[
 
 
 class _TokenProgramParser(Program[ParsedInstructions]):
+    """
+    Parser for the Token Program instructions.
+    """
+
     def __init__(self):
         self.program_id = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         self.program_name = "TokenProgram"
-
         self.desc = lambda d: d[0]
         self.desc_map = {
             0: self.process_InitializeMint,
@@ -179,6 +342,16 @@ class _TokenProgramParser(Program[ParsedInstructions]):
         }
 
     def route_instruction(self, tx: Transaction, instr_dict: dict) -> ParsedInstructions:
+        """
+        Routes a token program instruction using the discriminator.
+
+        Args:
+            tx: The Transaction object.
+            instr_dict: The instruction dictionary.
+
+        Returns:
+            A parsed token program instruction.
+        """
         raw_data = base58.decode(instr_dict.get("data", ""))
         discriminator = self.desc(raw_data)
         parser_func = self.desc_map.get(discriminator, self.desc_map.get("default"))
@@ -196,6 +369,18 @@ class _TokenProgramParser(Program[ParsedInstructions]):
         decoded_data: bytes,
         custom_accounts: Optional[List[int]] = None,
     ) -> InitializeMint:
+        """
+        Processes an InitializeMint instruction.
+
+        Args:
+            tx: The Transaction object.
+            instruction_index: Index of the instruction.
+            decoded_data: Decoded instruction data.
+            custom_accounts: Optional custom account indices.
+
+        Returns:
+            An InitializeMint parsed instruction.
+        """
         decimals = decoded_data[1]
         mint_authority = base58.encode(decoded_data[2:34]).decode("utf-8")
         option = decoded_data[34]
@@ -218,11 +403,19 @@ class _TokenProgramParser(Program[ParsedInstructions]):
         decoded_data: bytes,
         custom_accounts: Optional[List[int]] = None,
     ) -> InitializeAccount:
-        if custom_accounts is not None:
-            accounts = custom_accounts
-        else:
-            instr: Instruction = tx.message.instructions[instruction_index]
-            accounts = instr.accounts
+        """
+        Processes an InitializeAccount instruction.
+
+        Args:
+            tx: The Transaction object.
+            instruction_index: Index of the instruction.
+            decoded_data: Decoded instruction data.
+            custom_accounts: Optional custom account indices.
+
+        Returns:
+            An InitializeAccount parsed instruction.
+        """
+        accounts = custom_accounts if custom_accounts is not None else tx.message.instructions[instruction_index].accounts
         return InitializeAccount(
             program_id=self.program_id,
             program_name=self.program_name,
@@ -240,12 +433,20 @@ class _TokenProgramParser(Program[ParsedInstructions]):
         decoded_data: bytes,
         custom_accounts: Optional[List[int]] = None,
     ) -> InitializeMultisig:
+        """
+        Processes an InitializeMultisig instruction.
+
+        Args:
+            tx: The Transaction object.
+            instruction_index: Index of the instruction.
+            decoded_data: Decoded instruction data.
+            custom_accounts: Optional custom account indices.
+
+        Returns:
+            An InitializeMultisig parsed instruction.
+        """
         m = decoded_data[1]
-        if custom_accounts is not None:
-            accounts = custom_accounts
-        else:
-            instr: Instruction = tx.message.instructions[instruction_index]
-            accounts = instr.accounts
+        accounts = custom_accounts if custom_accounts is not None else tx.message.instructions[instruction_index].accounts
         signers = [tx.all_accounts[i] for i in accounts]
         return InitializeMultisig(
             program_id=self.program_id,
@@ -262,11 +463,19 @@ class _TokenProgramParser(Program[ParsedInstructions]):
         decoded_data: bytes,
         custom_accounts: Optional[List[int]] = None,
     ) -> Transfer:
-        if custom_accounts is not None:
-            accounts = custom_accounts
-        else:
-            instr: Instruction = tx.message.instructions[instruction_index]
-            accounts = instr.accounts
+        """
+        Processes a Transfer instruction.
+
+        Args:
+            tx: The Transaction object.
+            instruction_index: Index of the instruction.
+            decoded_data: Decoded instruction data.
+            custom_accounts: Optional custom account indices.
+
+        Returns:
+            A Transfer parsed instruction.
+        """
+        accounts = custom_accounts if custom_accounts is not None else tx.message.instructions[instruction_index].accounts
         amount = decode_u64(decoded_data[1:9])
         return Transfer(
             program_id=self.program_id,
@@ -284,11 +493,19 @@ class _TokenProgramParser(Program[ParsedInstructions]):
         decoded_data: bytes,
         custom_accounts: Optional[List[int]] = None,
     ) -> Approve:
-        if custom_accounts is not None:
-            accounts = custom_accounts
-        else:
-            instr: Instruction = tx.message.instructions[instruction_index]
-            accounts = instr.accounts
+        """
+        Processes an Approve instruction.
+
+        Args:
+            tx: The Transaction object.
+            instruction_index: Index of the instruction.
+            decoded_data: Decoded instruction data.
+            custom_accounts: Optional custom account indices.
+
+        Returns:
+            An Approve parsed instruction.
+        """
+        accounts = custom_accounts if custom_accounts is not None else tx.message.instructions[instruction_index].accounts
         amount = decode_u64(decoded_data[1:9])
         return Approve(
             program_id=self.program_id,
@@ -306,11 +523,19 @@ class _TokenProgramParser(Program[ParsedInstructions]):
         decoded_data: bytes,
         custom_accounts: Optional[List[int]] = None,
     ) -> Revoke:
-        if custom_accounts is not None:
-            accounts = custom_accounts
-        else:
-            instr: Instruction = tx.message.instructions[instruction_index]
-            accounts = instr.accounts
+        """
+        Processes a Revoke instruction.
+
+        Args:
+            tx: The Transaction object.
+            instruction_index: Index of the instruction.
+            decoded_data: Decoded instruction data.
+            custom_accounts: Optional custom account indices.
+
+        Returns:
+            A Revoke parsed instruction.
+        """
+        accounts = custom_accounts if custom_accounts is not None else tx.message.instructions[instruction_index].accounts
         return Revoke(
             program_id=self.program_id,
             program_name=self.program_name,
@@ -325,16 +550,24 @@ class _TokenProgramParser(Program[ParsedInstructions]):
         decoded_data: bytes,
         custom_accounts: Optional[List[int]] = None,
     ) -> SetAuthority:
+        """
+        Processes a SetAuthority instruction.
+
+        Args:
+            tx: The Transaction object.
+            instruction_index: Index of the instruction.
+            decoded_data: Decoded instruction data.
+            custom_accounts: Optional custom account indices.
+
+        Returns:
+            A SetAuthority parsed instruction.
+        """
         authority_type = decoded_data[1]
         option = decoded_data[2]
         new_authority = None
         if option == 1:
             new_authority = base58.encode(decoded_data[3:35]).decode("utf-8")
-        if custom_accounts is not None:
-            accounts = custom_accounts
-        else:
-            instr: Instruction = tx.message.instructions[instruction_index]
-            accounts = instr.accounts
+        accounts = custom_accounts if custom_accounts is not None else tx.message.instructions[instruction_index].accounts
         return SetAuthority(
             program_id=self.program_id,
             program_name=self.program_name,
@@ -351,11 +584,19 @@ class _TokenProgramParser(Program[ParsedInstructions]):
         decoded_data: bytes,
         custom_accounts: Optional[List[int]] = None,
     ) -> MintTo:
-        if custom_accounts is not None:
-            accounts = custom_accounts
-        else:
-            instr: Instruction = tx.message.instructions[instruction_index]
-            accounts = instr.accounts
+        """
+        Processes a MintTo instruction.
+
+        Args:
+            tx: The Transaction object.
+            instruction_index: Index of the instruction.
+            decoded_data: Decoded instruction data.
+            custom_accounts: Optional custom account indices.
+
+        Returns:
+            A MintTo parsed instruction.
+        """
+        accounts = custom_accounts if custom_accounts is not None else tx.message.instructions[instruction_index].accounts
         amount = decode_u64(decoded_data[1:9])
         return MintTo(
             program_id=self.program_id,
@@ -373,11 +614,19 @@ class _TokenProgramParser(Program[ParsedInstructions]):
         decoded_data: bytes,
         custom_accounts: Optional[List[int]] = None,
     ) -> Burn:
-        if custom_accounts is not None:
-            accounts = custom_accounts
-        else:
-            instr: Instruction = tx.message.instructions[instruction_index]
-            accounts = instr.accounts
+        """
+        Processes a Burn instruction.
+
+        Args:
+            tx: The Transaction object.
+            instruction_index: Index of the instruction.
+            decoded_data: Decoded instruction data.
+            custom_accounts: Optional custom account indices.
+
+        Returns:
+            A Burn parsed instruction.
+        """
+        accounts = custom_accounts if custom_accounts is not None else tx.message.instructions[instruction_index].accounts
         amount = decode_u64(decoded_data[1:9])
         return Burn(
             program_id=self.program_id,
@@ -395,11 +644,19 @@ class _TokenProgramParser(Program[ParsedInstructions]):
         decoded_data: bytes,
         custom_accounts: Optional[List[int]] = None,
     ) -> CloseAccount:
-        if custom_accounts is not None:
-            accounts = custom_accounts
-        else:
-            instr: Instruction = tx.message.instructions[instruction_index]
-            accounts = instr.accounts
+        """
+        Processes a CloseAccount instruction.
+
+        Args:
+            tx: The Transaction object.
+            instruction_index: Index of the instruction.
+            decoded_data: Decoded instruction data.
+            custom_accounts: Optional custom account indices.
+
+        Returns:
+            A CloseAccount parsed instruction.
+        """
+        accounts = custom_accounts if custom_accounts is not None else tx.message.instructions[instruction_index].accounts
         return CloseAccount(
             program_id=self.program_id,
             program_name=self.program_name,
@@ -416,11 +673,19 @@ class _TokenProgramParser(Program[ParsedInstructions]):
         decoded_data: bytes,
         custom_accounts: Optional[List[int]] = None,
     ) -> FreezeAccount:
-        if custom_accounts is not None:
-            accounts = custom_accounts
-        else:
-            instr: Instruction = tx.message.instructions[instruction_index]
-            accounts = instr.accounts
+        """
+        Processes a FreezeAccount instruction.
+
+        Args:
+            tx: The Transaction object.
+            instruction_index: Index of the instruction.
+            decoded_data: Decoded instruction data.
+            custom_accounts: Optional custom account indices.
+
+        Returns:
+            A FreezeAccount parsed instruction.
+        """
+        accounts = custom_accounts if custom_accounts is not None else tx.message.instructions[instruction_index].accounts
         return FreezeAccount(
             program_id=self.program_id,
             program_name=self.program_name,
@@ -437,11 +702,19 @@ class _TokenProgramParser(Program[ParsedInstructions]):
         decoded_data: bytes,
         custom_accounts: Optional[List[int]] = None,
     ) -> ThawAccount:
-        if custom_accounts is not None:
-            accounts = custom_accounts
-        else:
-            instr: Instruction = tx.message.instructions[instruction_index]
-            accounts = instr.accounts
+        """
+        Processes a ThawAccount instruction.
+
+        Args:
+            tx: The Transaction object.
+            instruction_index: Index of the instruction.
+            decoded_data: Decoded instruction data.
+            custom_accounts: Optional custom account indices.
+
+        Returns:
+            A ThawAccount parsed instruction.
+        """
+        accounts = custom_accounts if custom_accounts is not None else tx.message.instructions[instruction_index].accounts
         return ThawAccount(
             program_id=self.program_id,
             program_name=self.program_name,
@@ -458,11 +731,19 @@ class _TokenProgramParser(Program[ParsedInstructions]):
         decoded_data: bytes,
         custom_accounts: Optional[List[int]] = None,
     ) -> TransferChecked:
-        if custom_accounts is not None:
-            accounts = custom_accounts
-        else:
-            instr: Instruction = tx.message.instructions[instruction_index]
-            accounts = instr.accounts
+        """
+        Processes a TransferChecked instruction.
+
+        Args:
+            tx: The Transaction object.
+            instruction_index: Index of the instruction.
+            decoded_data: Decoded instruction data.
+            custom_accounts: Optional custom account indices.
+
+        Returns:
+            A TransferChecked parsed instruction.
+        """
+        accounts = custom_accounts if custom_accounts is not None else tx.message.instructions[instruction_index].accounts
         amount = decode_u64(decoded_data[1:9])
         decimals = int.from_bytes(decoded_data[9:10], byteorder="little", signed=False)
         return TransferChecked(
@@ -483,11 +764,19 @@ class _TokenProgramParser(Program[ParsedInstructions]):
         decoded_data: bytes,
         custom_accounts: Optional[List[int]] = None,
     ) -> ApproveChecked:
-        if custom_accounts is not None:
-            accounts = custom_accounts
-        else:
-            instr: Instruction = tx.message.instructions[instruction_index]
-            accounts = instr.accounts
+        """
+        Processes an ApproveChecked instruction.
+
+        Args:
+            tx: The Transaction object.
+            instruction_index: Index of the instruction.
+            decoded_data: Decoded instruction data.
+            custom_accounts: Optional custom account indices.
+
+        Returns:
+            An ApproveChecked parsed instruction.
+        """
+        accounts = custom_accounts if custom_accounts is not None else tx.message.instructions[instruction_index].accounts
         amount = decode_u64(decoded_data[1:9])
         decimals = int.from_bytes(decoded_data[9:10], byteorder="little", signed=False)
         return ApproveChecked(
@@ -507,11 +796,19 @@ class _TokenProgramParser(Program[ParsedInstructions]):
         decoded_data: bytes,
         custom_accounts: Optional[List[int]] = None,
     ) -> MintToChecked:
-        if custom_accounts is not None:
-            accounts = custom_accounts
-        else:
-            instr: Instruction = tx.message.instructions[instruction_index]
-            accounts = instr.accounts
+        """
+        Processes a MintToChecked instruction.
+
+        Args:
+            tx: The Transaction object.
+            instruction_index: Index of the instruction.
+            decoded_data: Decoded instruction data.
+            custom_accounts: Optional custom account indices.
+
+        Returns:
+            A MintToChecked parsed instruction.
+        """
+        accounts = custom_accounts if custom_accounts is not None else tx.message.instructions[instruction_index].accounts
         amount = decode_u64(decoded_data[1:9])
         decimals = int.from_bytes(decoded_data[9:10], byteorder="little", signed=False)
         return MintToChecked(
@@ -531,11 +828,19 @@ class _TokenProgramParser(Program[ParsedInstructions]):
         decoded_data: bytes,
         custom_accounts: Optional[List[int]] = None,
     ) -> BurnChecked:
-        if custom_accounts is not None:
-            accounts = custom_accounts
-        else:
-            instr: Instruction = tx.message.instructions[instruction_index]
-            accounts = instr.accounts
+        """
+        Processes a BurnChecked instruction.
+
+        Args:
+            tx: The Transaction object.
+            instruction_index: Index of the instruction.
+            decoded_data: Decoded instruction data.
+            custom_accounts: Optional custom account indices.
+
+        Returns:
+            A BurnChecked parsed instruction.
+        """
+        accounts = custom_accounts if custom_accounts is not None else tx.message.instructions[instruction_index].accounts
         amount = decode_u64(decoded_data[1:9])
         decimals = int.from_bytes(decoded_data[9:10], byteorder="little", signed=False)
         return BurnChecked(
@@ -555,6 +860,18 @@ class _TokenProgramParser(Program[ParsedInstructions]):
         decoded_data: bytes,
         custom_accounts: Optional[List[int]] = None,
     ) -> Unknown:
+        """
+        Processes an unknown instruction.
+
+        Args:
+            tx: The Transaction object.
+            instruction_index: Index of the instruction.
+            decoded_data: Decoded instruction data.
+            custom_accounts: Optional custom account indices.
+
+        Returns:
+            An Unknown parsed instruction.
+        """
         return Unknown(
             program_id=self.program_id,
             program_name=self.program_name,
@@ -562,6 +879,15 @@ class _TokenProgramParser(Program[ParsedInstructions]):
         )
 
     def _decode_pubkey(self, b: bytes) -> str:
+        """
+        Decodes a public key from bytes using base58 encoding.
+
+        Args:
+            b: Bytes representing the public key.
+
+        Returns:
+            The decoded public key as a string.
+        """
         return base58.encode(b).decode("utf-8")
 
 

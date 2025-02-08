@@ -11,10 +11,13 @@ PLATFORM = {
 
 def enrich(tx: Transaction) -> Tuple[Optional[str], Optional[str]]:
     """
-    Identifies the platform of the transaction.
+    Identifies the platform of the transaction based on known addresses.
+
+    Args:
+        tx: The Transaction object.
 
     Returns:
-        A tuple of the platform address and the platform name.
+        A tuple containing the platform address and platform name if found, otherwise (None, None).
     """
     for address in tx.all_accounts:
         if address in PLATFORM:
