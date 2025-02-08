@@ -1,7 +1,7 @@
 import abc
 from abc import abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, Generic, Optional, TypeVar
+from typing import Dict, Generic, Optional, TypeVar
 
 import qbase58 as base58
 
@@ -24,10 +24,10 @@ class ParsedInstruction:
     instruction_name: str
 
 
-T = TypeVar("T", bound=ParsedInstruction)
+T_Program = TypeVar("T", bound=ParsedInstruction)
 
 
-class Program(abc.ABC, Generic[T]):
+class Program(abc.ABC, Generic[T_Program]):
     """
     Abstract base class for program parsers.
 
@@ -45,7 +45,7 @@ class Program(abc.ABC, Generic[T]):
     desc: callable
     desc_map: Dict[bytes | int, callable]
 
-    def route(self, tx: Transaction, instruction_index: int) -> T:
+    def route(self, tx: Transaction, instruction_index: int) -> T_Program:
         """
         Routes the instruction to the correct parser based on the discriminator.
 
@@ -76,7 +76,17 @@ class Program(abc.ABC, Generic[T]):
         return parser_func(tx, instruction_index, decoded_data)
 
 
-class Addon(abc.ABC):
+@dataclass(slots=True)
+class AddonInfo:
+    """
+    Information about an addon.
+    """
+
+
+T_Addon = TypeVar("T", bound=AddonInfo)
+
+
+class Addon(abc.ABC, Generic[T_Addon]):
     """
     Abstract base class for addon enrichers.
 
@@ -87,7 +97,7 @@ class Addon(abc.ABC):
     addon_name: str
 
     @abstractmethod
-    def enrich(self, tx: Transaction) -> Optional[Dict[str, Any]]:
+    def enrich(self, tx: Transaction) -> Optional[T_Addon]:
         """
         Enriches the given transaction and returns extra data.
 

@@ -1,7 +1,8 @@
-from typing import Any, Dict, Optional
+from dataclasses import dataclass
+from typing import Optional
 
 from soltxs.normalizer.models import Transaction
-from soltxs.parser.models import Addon
+from soltxs.parser.models import Addon, AddonInfo
 
 PLATFORM = {
     "tro46jTMkb56A3wPepo5HT7JcvX9wFWvR8VaJzgdjEf": "Trojan",
@@ -10,14 +11,20 @@ PLATFORM = {
 }
 
 
-class _PlatformIdentifierAddon(Addon):
+@dataclass(slots=True)
+class PlatformIdentifier(AddonInfo):
+    address: str
+    name: str
+
+
+class _PlatformIdentifierAddon(Addon[PlatformIdentifier]):
     def __init__(self):
         self.addon_name = "platform_identifier"
 
-    def enrich(self, tx: Transaction) -> Optional[Dict[str, Any]]:
+    def enrich(self, tx: Transaction) -> Optional[PlatformIdentifier]:
         for address in tx.all_accounts:
             if address in PLATFORM:
-                return {"address": address, "name": PLATFORM[address]}
+                return PlatformIdentifier(address=address, name=PLATFORM[address])
         return None
 
 
