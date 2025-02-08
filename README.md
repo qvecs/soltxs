@@ -66,10 +66,11 @@ parsed_data = soltxs.parse(norm_tx)
 #         <UnknownProgram.Unknown(...)>,
 #     ],
 #     "addons": {
-#         {"compute_units": {...}},
-#         {"instruction_count": {...}},
-#         {"platform_identifier": {...}},
-#         {"token_transfer_summary": {...}}
+#         {"compute_units": <ComputeUnitsAddon(...)>},
+#         {"instruction_count": <InstructionCount(...)>},
+#         {"loaded_addresses": <LoadedAddresses(...)>},
+#         {"platform_identifier": <PlatformIdentifier(...)>},
+#         {"token_transfer_summary": <TokenTransfer(...)>}
 #     }
 # }
 
