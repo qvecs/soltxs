@@ -1,4 +1,4 @@
-# Solana Transactions _(soltxs)_
+# 📟 Solana Transactions _(soltxs)_
 
 Solana transaction normalizer, parser, and resolver.
 
@@ -66,7 +66,7 @@ parsed_data = soltxs.parse(norm_tx)
 #         <UnknownProgram.Unknown(...)>,
 #     ],
 #     "addons": {
-#         {"compute_units": <ComputeUnitsAddon(...)>},
+#         {"compute_units": <ComputeUnits(...)>},
 #         {"instruction_count": <InstructionCount(...)>},
 #         {"loaded_addresses": <LoadedAddresses(...)>},
 #         {"platform_identifier": <PlatformIdentifier(...)>},
