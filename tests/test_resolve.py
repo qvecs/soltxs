@@ -12,7 +12,7 @@ def test_resolve_pumpfun_buy(load_data):
     outcome = resolve(parsed)
 
     assert isinstance(outcome, Resolve)
-    assert getattr(outcome, "type", None) == "Buy"
+    assert getattr(outcome, "type", None) == "buy"
     assert getattr(outcome, "from_amount", 0) > 0
 
 
@@ -25,7 +25,7 @@ def test_resolve_pumpfun_sell(load_data):
     parsed = parse(tx_obj)
     outcome = resolve(parsed)
 
-    assert getattr(outcome, "type", None) == "Sell"
+    assert getattr(outcome, "type", None) == "sell"
     assert getattr(outcome, "to_amount", 0) > 0
 
 
@@ -51,7 +51,7 @@ def test_resolve_no_match():
     from soltxs.parser.parsers.unknown import Unknown as UnknownInstr
     from soltxs.resolver.resolvers.unknown import Unknown as UnknownResolve
 
-    # A dummy set of instructions containing only Unknown
+    # A dummy set of instructions containing only Unknown.
     unknown_instructions = [
         UnknownInstr(
             program_id="FakeID",
@@ -60,5 +60,7 @@ def test_resolve_no_match():
             instruction_index=0,
         )
     ]
-    result = resolve(unknown_instructions)
+    # Build a dummy parsed_data dictionary.
+    parsed_data = {"signatures": [], "instructions": unknown_instructions, "addons": {}}
+    result = resolve(parsed_data)
     assert isinstance(result, UnknownResolve)

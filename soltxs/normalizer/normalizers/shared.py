@@ -10,11 +10,17 @@ from soltxs.normalizer.models import (
 
 def instructions(instr: dict) -> Instruction:
     """
-    Ensure instruction has 'accounts' and 'stackHeight'.
+    Converts a raw instruction dictionary to an Instruction object.
+
+    Args:
+        instr: The raw instruction dictionary.
+
+    Returns:
+        An Instruction object.
     """
     return Instruction(
         programIdIndex=instr["programIdIndex"],
-        data=instr["data"],
+        data=instr.get("data", ""),
         accounts=instr.get("accounts", []),
         stackHeight=instr.get("stackHeight", None),
     )
@@ -22,7 +28,13 @@ def instructions(instr: dict) -> Instruction:
 
 def address_lookup(lookup: dict) -> AddressTableLookup:
     """
-    Ensure address table lookup has 'readonlyIndexes' and 'writableIndexes' as lists.
+    Converts a raw address lookup dictionary to an AddressTableLookup object.
+
+    Args:
+        lookup: The raw lookup dictionary.
+
+    Returns:
+        An AddressTableLookup object.
     """
     return AddressTableLookup(
         accountKey=lookup["accountKey"],
@@ -33,7 +45,13 @@ def address_lookup(lookup: dict) -> AddressTableLookup:
 
 def token_balance(tb: dict) -> TokenBalance:
     """
-    Convert raw dict to our TokenBalance typed dict.
+    Converts a raw token balance dictionary to a TokenBalance object.
+
+    Args:
+        tb: The raw token balance dictionary.
+
+    Returns:
+        A TokenBalance object.
     """
     return TokenBalance(
         accountIndex=tb["accountIndex"],

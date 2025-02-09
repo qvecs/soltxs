@@ -9,11 +9,25 @@ from soltxs.parser.models import ParsedInstruction, Program
 
 @dataclass(slots=True)
 class SetComputeUnitLimit(ParsedInstruction):
+    """
+    Parsed instruction for setting compute unit limit.
+
+    Attributes:
+        compute_unit_limit: The new compute unit limit.
+    """
+
     compute_unit_limit: int
 
 
 @dataclass(slots=True)
 class SetComputeUnitPrice(ParsedInstruction):
+    """
+    Parsed instruction for setting compute unit price.
+
+    Attributes:
+        micro_lamports: The price per compute unit in micro lamports.
+    """
+
     micro_lamports: int
 
 
@@ -22,13 +36,12 @@ ParsedInstructions = Union[SetComputeUnitLimit, SetComputeUnitPrice]
 
 class _ComputeBudgetParser(Program[ParsedInstructions]):
     """
-    Solana's Compute Budget program for adjusting compute unit limits and prices.
+    Parser for the Compute Budget program.
     """
 
     def __init__(self):
         self.program_id = "ComputeBudget111111111111111111111111111111"
         self.program_name = "ComputeBudget"
-
         self.desc = lambda d: d[0]
         self.desc_map = {
             2: self.process_SetComputeUnitLimit,
@@ -41,6 +54,17 @@ class _ComputeBudgetParser(Program[ParsedInstructions]):
         instruction_index: int,
         decoded_data: bytes,
     ) -> SetComputeUnitLimit:
+        """
+        Processes a SetComputeUnitLimit instruction.
+
+        Args:
+            tx: The Transaction object.
+            instruction_index: Index of the instruction.
+            decoded_data: Decoded instruction data.
+
+        Returns:
+            A SetComputeUnitLimit parsed instruction.
+        """
         return SetComputeUnitLimit(
             program_id=self.program_id,
             program_name=self.program_name,
@@ -54,6 +78,17 @@ class _ComputeBudgetParser(Program[ParsedInstructions]):
         instruction_index: int,
         decoded_data: bytes,
     ) -> SetComputeUnitPrice:
+        """
+        Processes a SetComputeUnitPrice instruction.
+
+        Args:
+            tx: The Transaction object.
+            instruction_index: Index of the instruction.
+            decoded_data: Decoded instruction data.
+
+        Returns:
+            A SetComputeUnitPrice parsed instruction.
+        """
         return SetComputeUnitPrice(
             program_id=self.program_id,
             program_name=self.program_name,

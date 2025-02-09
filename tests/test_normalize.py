@@ -126,7 +126,7 @@ def test_equal_transaction(load_data):
     tx1 = normalize(load_data("raydium_amm_v4_geyser.json"))
     tx2 = normalize(load_data("raydium_amm_v4_rpc.json"))
 
-    # Geyser block_time is None; unify for comparison
+    # Geyser block_time is None; unify for comparison.
     tx1.blockTime = None
     tx2.blockTime = None
 

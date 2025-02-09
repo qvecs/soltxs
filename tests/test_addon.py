@@ -1,5 +1,5 @@
-from soltxs.parser.addons.platform_identifier import enrich
 from soltxs.normalizer.models import LoadedAddresses, Message, Meta, Transaction
+from soltxs.parser.addons.platform_identifier import PlatformIdentifierAddon
 
 
 def test_enrichment_platform_identifier():
@@ -34,16 +34,17 @@ def test_enrichment_platform_identifier():
         ),
         loadedAddresses=LoadedAddresses(writable=[], readonly=[]),
     )
-
-    platform_addr, platform_name = enrich(tx)
-    assert platform_name == "BullX"
-    assert platform_addr == "9RYJ3qr5eU5xAooqVcbmdeusjcViL5Nkiq7Gske3tiKq"
+    result = PlatformIdentifierAddon.enrich(tx)
+    # The current enrich method returns a dict if found or None.
+    assert result is not None, "Expected to find a platform match"
+    assert result.name == "BullX"
+    assert result.address == "9RYJ3qr5eU5xAooqVcbmdeusjcViL5Nkiq7Gske3tiKq"
 
 
 def test_enrichment_platform_not_found():
     """
     Ensures that if the transaction does not reference a known platform address,
-    we get (None, None).
+    the enrichment returns None.
     """
     tx = Transaction(
         slot=0,
@@ -69,7 +70,5 @@ def test_enrichment_platform_not_found():
         ),
         loadedAddresses=LoadedAddresses(writable=[], readonly=[]),
     )
-
-    platform_addr, platform_name = enrich(tx)
-    assert platform_name is None
-    assert platform_addr is None
+    result = PlatformIdentifierAddon.enrich(tx)
+    assert result is None, "Expected no platform match"

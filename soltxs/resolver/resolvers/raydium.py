@@ -10,6 +10,19 @@ SOL_MINT = "11111111111111111111111111111111"
 
 @dataclass(slots=True)
 class Raydium(Resolve):
+    """
+    Represents a resolved Raydium transaction.
+
+    Attributes:
+        type: The type of swap (e.g., 'swap', 'buy', 'sell').
+        who: The user account performing the swap.
+        from_token: The token being sold.
+        from_amount: Amount sold (adjusted for decimals).
+        to_token: The token being bought.
+        to_amount: Amount bought (adjusted for decimals).
+        minimum_amount_out: The minimum amount expected (adjusted for decimals).
+    """
+
     type: str
     who: str
     from_token: str
@@ -20,7 +33,20 @@ class Raydium(Resolve):
 
 
 class _RaydiumResolver(Resolver):
+    """
+    Resolver for Raydium AMM instructions.
+    """
+
     def resolve(self, instructions: List[parser.models.ParsedInstruction]) -> Optional[Resolve]:
+        """
+        Resolves Raydium swap instructions from parsed instructions.
+
+        Args:
+            instructions: List of parsed instructions.
+
+        Returns:
+            A Raydium resolved object if a swap instruction is found, else None.
+        """
         instrs = [i for i in instructions if isinstance(i, parser.parsers.raydiumAMM.Swap)]
         if len(instrs) == 1:
             instr = instrs[0]
