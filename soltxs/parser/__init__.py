@@ -20,6 +20,7 @@ addon_enrichers: List[models.Addon] = [
     addons.loaded_addresses.LoadedAddressesAddon,
     addons.platform_identifier.PlatformIdentifierAddon,
     addons.token_transfer.TokenTransferSummaryAddon,
+    addons.transaction_status.TransactionStatusAddon,
 ]
 
 # Dynamic dataclass for addon enrichment data.
