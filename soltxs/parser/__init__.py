@@ -24,7 +24,7 @@ addon_enrichers: List[models.Addon] = [
 ]
 
 # Dynamic dataclass for addon enrichment data.
-Addons = make_dataclass("Addons", [(addon.addon_name, Optional[addon], None) for addon in addon_enrichers])
+Addons = make_dataclass("Addons", [(addon.addon_name, addon.enrich.__annotations__.get("return", object), None) for addon in addon_enrichers])
 
 
 def parse(tx: Transaction) -> models.ParsedTransaction:
