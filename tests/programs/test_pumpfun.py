@@ -1,4 +1,5 @@
 from dataclasses import asdict
+
 from soltxs import normalize, parse
 
 
@@ -26,11 +27,11 @@ def test_buy_parsing(load_data):
     rpc_parsed = parse(rpc_tx)
 
     # Compare top-level fields.
-    assert ge_parsed["signatures"] == rpc_parsed["signatures"]
-    assert ge_parsed["addons"] == rpc_parsed["addons"]
+    assert ge_parsed.signatures == rpc_parsed.signatures
+    assert ge_parsed.addons == rpc_parsed.addons
 
     # Now iterate only over the parsed instructions.
-    for action1, action2 in zip(ge_parsed["instructions"], rpc_parsed["instructions"]):
+    for action1, action2 in zip(ge_parsed.instructions, rpc_parsed.instructions):
         d1 = asdict(action1)
         d2 = asdict(action2)
         assert d1 == d2
@@ -46,7 +47,7 @@ def test_sell_parsing(load_data):
     """
     tx = normalize(load_data("pumpfun_sell_rpc.json"))
     parsed = parse(tx)
-    for action in parsed["instructions"]:
+    for action in parsed.instructions:
         a_dict = asdict(action)
         if a_dict.get("program_name") == "PumpFun" and a_dict.get("instruction_name") == "Sell":
             assert a_dict["from_token_amount"] > 0
@@ -59,7 +60,7 @@ def test_create_parsing(load_data):
     """
     tx = normalize(load_data("pumpfun_create_rpc.json"))
     parsed = parse(tx)
-    for action in parsed["instructions"]:
+    for action in parsed.instructions:
         a_dict = asdict(action)
         if a_dict.get("program_name") == "PumpFun" and a_dict.get("instruction_name") == "Create":
             assert a_dict["mint"] is not None

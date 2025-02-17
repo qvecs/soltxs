@@ -26,11 +26,11 @@ def test_parsing(load_data):
     rpc_parse = parse(rpc_tx)
 
     # Compare top-level fields.
-    assert ge_parse["signatures"] == rpc_parse["signatures"]
-    assert ge_parse["addons"] == rpc_parse["addons"]
+    assert ge_parse.signatures == rpc_parse.signatures
+    assert ge_parse.addons == rpc_parse.addons
 
     # Iterate over the parsed instructions.
-    for g, r in zip(ge_parse["instructions"], rpc_parse["instructions"]):
+    for g, r in zip(ge_parse.instructions, rpc_parse.instructions):
         dg = asdict(g)
         dr = asdict(r)
         assert dg == dr

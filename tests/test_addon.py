@@ -34,7 +34,7 @@ def test_enrichment_platform_identifier():
         ),
         loadedAddresses=LoadedAddresses(writable=[], readonly=[]),
     )
-    result = PlatformIdentifierAddon.enrich(tx)
+    result = PlatformIdentifierAddon.enrich(tx, [])
     # The current enrich method returns a dict if found or None.
     assert result is not None, "Expected to find a platform match"
     assert result.name == "BullX"
@@ -70,5 +70,5 @@ def test_enrichment_platform_not_found():
         ),
         loadedAddresses=LoadedAddresses(writable=[], readonly=[]),
     )
-    result = PlatformIdentifierAddon.enrich(tx)
+    result = PlatformIdentifierAddon.enrich(tx, [])
     assert result is None, "Expected no platform match"
