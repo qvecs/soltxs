@@ -38,16 +38,16 @@ def parse(tx: Transaction) -> Dict[str, Any]:
     parsed_instructions = []
 
     for idx, instruction in enumerate(tx.message.instructions):
-        # Determine the program id for the instruction.
         program_id = tx.message.accountKeys[instruction.programIdIndex]
-        # Select the appropriate parser; default to UnknownParser if not found.
+
         router = id_to_handler.get(program_id, parsers.unknown.UnknownParser(program_id))
         action = router.route(tx, idx)
+
         parsed_instructions.append(action)
 
     addons_result: Dict[str, Any] = {}
     for addon in addon_enrichers:
-        result = addon.enrich(tx)
+        result = addon.enrich(tx, parsed_instructions)
         if result is not None:
             addons_result[addon.addon_name] = result
 

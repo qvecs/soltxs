@@ -1,8 +1,8 @@
 from dataclasses import dataclass
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 from soltxs.normalizer.models import Transaction
-from soltxs.parser.models import Addon, AddonInfo
+from soltxs.parser.models import Addon, AddonInfo, Program
 
 
 @dataclass(slots=True)
@@ -14,7 +14,7 @@ class _InstructionCountAddon(Addon[InstructionCount]):
     def __init__(self):
         self.addon_name = "instruction_count"
 
-    def enrich(self, tx: Transaction) -> Optional[InstructionCount]:
+    def enrich(self, tx: Transaction, parsed_instructions: List[Program]) -> Optional[InstructionCount]:
         counts: Dict[str, int] = {}
         for instr in tx.message.instructions:
             prog_id = tx.message.accountKeys[instr.programIdIndex]
