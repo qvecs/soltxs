@@ -22,6 +22,9 @@ def test_parsing(load_data):
     ge_tx = normalize(load_data("raydium_amm_v4_geyser.json"))
     rpc_tx = normalize(load_data("raydium_amm_v4_rpc.json"))
 
+    ge_tx.blockTime = None
+    rpc_tx.blockTime = None
+
     ge_parse = parse(ge_tx)
     rpc_parse = parse(rpc_tx)
 

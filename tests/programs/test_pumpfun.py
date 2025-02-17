@@ -24,6 +24,9 @@ def test_buy_parsing(load_data):
     ge_tx = normalize(load_data("pumpfun_buy_geyser.json"))
     rpc_tx = normalize(load_data("pumpfun_buy_rpc.json"))
 
+    ge_tx.blockTime = None
+    rpc_tx.blockTime = None
+
     ge_parsed = parse(ge_tx)
     rpc_parsed = parse(rpc_tx)
 
