@@ -1,7 +1,7 @@
 import abc
 from abc import abstractmethod
 from dataclasses import dataclass
-from typing import Dict, Generic, Optional, TypeVar
+from typing import Dict, Generic, List, Optional, TypeVar
 
 import qbase58 as base58
 
@@ -107,3 +107,19 @@ class Addon(abc.ABC, Generic[T_Addon]):
         Returns:
             A dictionary with enrichment data or None if no enrichment is available.
         """
+
+
+@dataclass(slots=True)
+class ParsedTransaction:
+    """
+    Base class for a parsed instruction.
+
+    Attributes:
+        program_id: The program id that processed the instruction.
+        program_name: The name of the program.
+        instruction_name: The specific instruction name.
+    """
+
+    signatures: List[str]
+    instructions: List[ParsedInstruction]
+    addons: List[Dict[str, Addon]]

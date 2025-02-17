@@ -1,10 +1,8 @@
-from typing import Any, Dict
-
-from soltxs import parser
+from soltxs.parser.models import ParsedTransaction
 from soltxs.resolver import models, resolvers
 
 
-def resolve(parsed_data: Dict[str, Any]) -> models.Resolve:
+def resolve(parsed_tx: ParsedTransaction) -> models.Resolve:
     """
     Translates the parsed transaction data into a final human-readable interpretation.
 
@@ -14,10 +12,9 @@ def resolve(parsed_data: Dict[str, Any]) -> models.Resolve:
     Returns:
         A resolved transaction object.
     """
-    instructions = parsed_data.get("instructions", [])
     for transformer in (resolvers.pumpfun.PumpFunResolver, resolvers.raydium.RaydiumResolver):
-        result = transformer.resolve(instructions)
+        result = transformer.resolve(parsed_tx.instructions)
         if result is not None:
             return result
 
-    return resolvers.unknown.UnknownResolver.resolve(instructions)
+    return resolvers.unknown.UnknownResolver.resolve(parsed_tx.instructions)
