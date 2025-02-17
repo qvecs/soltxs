@@ -1,6 +1,6 @@
 import hashlib
 from dataclasses import dataclass
-from typing import List, Optional, Union
+from typing import Optional, Union
 
 import qbase58 as base58
 import qborsh
@@ -43,54 +43,34 @@ class Create(ParsedInstruction):
 
 
 @dataclass(slots=True)
-class Buy(ParsedInstruction):
+class Swap(ParsedInstruction):
     """
-    Parsed instruction for a PumpFun 'Buy' operation.
+    Parsed instruction for a PumpFun swap operation.
+
+    This simply decodes the raw swap data provided by the program.
 
     Attributes:
-        who: The buyer's account.
-        from_token: The token being exchanged from.
-        from_token_decimals: Decimals for the from token.
-        to_token: The token being received.
-        to_token_decimals: Decimals for the to token.
-        from_token_amount: Raw amount of the from token.
-        to_token_amount: Raw amount of the to token.
+        is_buy: Boolean flag indicating if the swap is a buy.
+        sol_amount: Amount in SOL.
+        token_amount: Amount of token.
+        user: User account address.
+        mint: Token mint address.
+        timestamp: Timestamp of the operation.
+        virtual_sol_reserves: Virtual SOL reserves.
+        virtual_token_reserves: Virtual token reserves.
     """
 
-    who: str
-    from_token: str
-    from_token_decimals: int
-    to_token: str
-    to_token_decimals: int
-    from_token_amount: int
-    to_token_amount: int
+    is_buy: bool
+    sol_amount: int
+    token_amount: int
+    user: str
+    mint: str
+    timestamp: int
+    virtual_sol_reserves: int
+    virtual_token_reserves: int
 
 
-@dataclass(slots=True)
-class Sell(ParsedInstruction):
-    """
-    Parsed instruction for a PumpFun 'Sell' operation.
-
-    Attributes:
-        who: The seller's account.
-        from_token: The token being sold.
-        from_token_decimals: Decimals for the sold token.
-        to_token: The token being received.
-        to_token_decimals: Decimals for the received token.
-        from_token_amount: Raw amount of the from token.
-        to_token_amount: Raw amount of the to token.
-    """
-
-    who: str
-    from_token: str
-    from_token_decimals: int
-    to_token: str
-    to_token_decimals: int
-    from_token_amount: int
-    to_token_amount: int
-
-
-ParsedInstructions = Union[Create, Buy, Sell]
+ParsedInstructions = Union[Create, Swap]
 
 
 @qborsh.schema
@@ -146,19 +126,19 @@ class _PumpFunParser(Program[ParsedInstructions]):
         calculate_discriminator = lambda x: hashlib.sha256(x.encode("utf-8")).digest()[:8]
         self.desc = lambda d: d[:8]
         self.desc_map = {
-            calculate_discriminator("global:buy"): self.parse_Buy,
-            calculate_discriminator("global:sell"): self.parse_Sell,
+            calculate_discriminator("global:buy"): self.parse_Swap,
+            calculate_discriminator("global:sell"): self.parse_Swap,
             calculate_discriminator("global:create"): self.parse_Create,
         }
 
-    def parse_Buy(
+    def parse_Swap(
         self,
         tx: Transaction,
         instruction_index: int,
         decoded_data: bytes,
-    ) -> Buy:
+    ) -> Swap:
         """
-        Parses a 'Buy' instruction.
+        Parses a swap instruction without applying additional business logic.
 
         Args:
             tx: The Transaction object.
@@ -166,120 +146,7 @@ class _PumpFunParser(Program[ParsedInstructions]):
             decoded_data: Decoded instruction data.
 
         Returns:
-            A Buy parsed instruction.
-        """
-        swap_list = self._parse_swap(tx, instruction_index)
-        data = swap_list[0]
-        from_token = WSOL_MINT
-        to_token = str(data["mint"])
-        who = str(data["user"])
-        from_amount = int(data["sol_amount"])
-        to_amount = int(data["token_amount"])
-        from_decimals = SOL_DECIMALS
-        to_decimals = self._get_token_decimals(tx, to_token)
-
-        return Buy(
-            program_id=self.program_id,
-            program_name=self.program_name,
-            instruction_name="Buy",
-            who=who,
-            from_token=from_token,
-            from_token_decimals=from_decimals,
-            to_token=to_token,
-            to_token_decimals=to_decimals,
-            from_token_amount=from_amount,
-            to_token_amount=to_amount,
-        )
-
-    def parse_Sell(
-        self,
-        tx: Transaction,
-        instruction_index: int,
-        decoded_data: bytes,
-    ) -> Sell:
-        """
-        Parses a 'Sell' instruction.
-
-        Args:
-            tx: The Transaction object.
-            instruction_index: Index of the instruction.
-            decoded_data: Decoded instruction data.
-
-        Returns:
-            A Sell parsed instruction.
-        """
-        swap_list = self._parse_swap(tx, instruction_index)
-        data = swap_list[0]
-        from_token = str(data["mint"])
-        to_token = WSOL_MINT
-        who = str(data["user"])
-        from_amount = int(data["token_amount"])
-        to_amount = int(data["sol_amount"])
-        from_decimals = self._get_token_decimals(tx, from_token)
-        to_decimals = SOL_DECIMALS
-
-        return Sell(
-            program_id=self.program_id,
-            program_name=self.program_name,
-            instruction_name="Sell",
-            who=who,
-            from_token=from_token,
-            from_token_decimals=from_decimals,
-            to_token=to_token,
-            to_token_decimals=to_decimals,
-            from_token_amount=from_amount,
-            to_token_amount=to_amount,
-        )
-
-    def parse_Create(
-        self,
-        tx: Transaction,
-        instruction_index: int,
-        decoded_data: bytes,
-    ) -> Create:
-        """
-        Parses a 'Create' instruction.
-
-        Args:
-            tx: The Transaction object.
-            instruction_index: Index of the instruction.
-            decoded_data: Decoded instruction data.
-
-        Returns:
-            A Create parsed instruction.
-        """
-        raw = decoded_data[8:]
-        create_data = CreateData.decode(raw)
-        instr: Instruction = tx.message.instructions[instruction_index]
-        who = None
-        if len(instr.accounts) > 7:
-            who = tx.all_accounts[instr.accounts[7]]
-        return Create(
-            program_id=self.program_id,
-            program_name=self.program_name,
-            instruction_name="Create",
-            who=who,
-            mint=tx.all_accounts[instr.accounts[0]] if len(instr.accounts) > 0 else None,
-            mint_authority=tx.all_accounts[instr.accounts[1]] if len(instr.accounts) > 1 else None,
-            bonding_curve=tx.all_accounts[instr.accounts[2]] if len(instr.accounts) > 2 else None,
-            associated_bonding_curve=tx.all_accounts[instr.accounts[3]] if len(instr.accounts) > 3 else None,
-            mpl_token_metadata=tx.all_accounts[instr.accounts[5]] if len(instr.accounts) > 5 else None,
-            metadata=tx.all_accounts[instr.accounts[6]] if len(instr.accounts) > 6 else None,
-            name=create_data["name"],
-            symbol=create_data["symbol"],
-            uri=create_data["uri"],
-        )
-
-    def _parse_swap(self, tx: Transaction, instruction_index: int) -> List[SwapData]:
-        """
-        Parses swap data from inner instructions.
-
-        Args:
-            tx: The Transaction object.
-            instruction_index: Index of the instruction.
-
-        Returns:
-            A list of SwapData objects extracted from inner instructions.
+            A Swap parsed instruction containing the raw swap data.
         """
         top_instr = tx.message.instructions[instruction_index]
         top_prog_id = tx.all_accounts[top_instr.programIdIndex]
@@ -306,30 +173,59 @@ class _PumpFunParser(Program[ParsedInstructions]):
             parsed_obj = SwapData.decode(swap_raw)
             result_list.append(parsed_obj)
 
-        return result_list
+        data = result_list[0]
+        return Swap(
+            program_id=self.program_id,
+            program_name=self.program_name,
+            instruction_name="Swap",
+            is_buy=bool(data["is_buy"]),
+            sol_amount=int(data["sol_amount"]),
+            token_amount=int(data["token_amount"]),
+            user=str(data["user"]),
+            mint=str(data["mint"]),
+            timestamp=int(data["timestamp"]),
+            virtual_sol_reserves=int(data["virtual_sol_reserves"]),
+            virtual_token_reserves=int(data["virtual_token_reserves"]),
+        )
 
-    def _get_token_decimals(self, tx: Transaction, mint: str) -> int:
+    def parse_Create(
+        self,
+        tx: Transaction,
+        instruction_index: int,
+        decoded_data: bytes,
+    ) -> Create:
         """
-        Retrieves the token decimals for a given mint from token balances.
+        Parses a 'Create' instruction.
 
         Args:
             tx: The Transaction object.
-            mint: The token mint address.
+            instruction_index: The index of the instruction.
+            decoded_data: Decoded instruction data.
 
         Returns:
-            The number of decimals for the token.
-
-        Raises:
-            ValueError: If the token decimals cannot be found.
+            A Create parsed instruction.
         """
-        if mint == WSOL_MINT:
-            return SOL_DECIMALS
-
-        for tb in tx.meta.preTokenBalances + tx.meta.postTokenBalances:
-            if tb.mint == mint:
-                return tb.uiTokenAmount.decimals
-
-        raise ValueError(f"Could not find decimals for mint {mint}")
+        raw = decoded_data[8:]
+        create_data = CreateData.decode(raw)
+        instr: Instruction = tx.message.instructions[instruction_index]
+        who = None
+        if len(instr.accounts) > 7:
+            who = tx.all_accounts[instr.accounts[7]]
+        return Create(
+            program_id=self.program_id,
+            program_name=self.program_name,
+            instruction_name="Create",
+            who=who,
+            mint=tx.all_accounts[instr.accounts[0]] if len(instr.accounts) > 0 else None,
+            mint_authority=tx.all_accounts[instr.accounts[1]] if len(instr.accounts) > 1 else None,
+            bonding_curve=tx.all_accounts[instr.accounts[2]] if len(instr.accounts) > 2 else None,
+            associated_bonding_curve=tx.all_accounts[instr.accounts[3]] if len(instr.accounts) > 3 else None,
+            mpl_token_metadata=tx.all_accounts[instr.accounts[5]] if len(instr.accounts) > 5 else None,
+            metadata=tx.all_accounts[instr.accounts[6]] if len(instr.accounts) > 6 else None,
+            name=create_data["name"],
+            symbol=create_data["symbol"],
+            uri=create_data["uri"],
+        )
 
 
 PumpFunParser = _PumpFunParser()

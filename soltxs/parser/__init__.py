@@ -1,4 +1,5 @@
-from typing import Any, Dict, List
+from dataclasses import make_dataclass
+from typing import Dict, List, Optional
 
 from soltxs.normalizer.models import Transaction
 from soltxs.parser import addons, models, parsers
@@ -19,10 +20,14 @@ addon_enrichers: List[models.Addon] = [
     addons.loaded_addresses.LoadedAddressesAddon,
     addons.platform_identifier.PlatformIdentifierAddon,
     addons.token_transfer.TokenTransferSummaryAddon,
+    addons.transaction_status.TransactionStatusAddon,
 ]
 
+# Dynamic dataclass for addon enrichment data.
+Addons = make_dataclass("Addons", [(addon.addon_name, Optional[addon], None) for addon in addon_enrichers])
 
-def parse(tx: Transaction) -> Dict[str, Any]:
+
+def parse(tx: Transaction) -> models.ParsedTransaction:
     """
     Parses a normalized transaction into its component instructions and addon data.
 
@@ -30,29 +35,26 @@ def parse(tx: Transaction) -> Dict[str, Any]:
         tx: A normalized Transaction object.
 
     Returns:
-        A dictionary containing:
-          - "signatures": List of transaction signatures.
-          - "instructions": List of parsed instruction objects.
-          - "addons": Dictionary of addon enrichment data.
+        A ParsedTransaction object with the parsed instructions and addon data.
     """
     parsed_instructions = []
 
     for idx, instruction in enumerate(tx.message.instructions):
-        # Determine the program id for the instruction.
         program_id = tx.message.accountKeys[instruction.programIdIndex]
-        # Select the appropriate parser; default to UnknownParser if not found.
+
         router = id_to_handler.get(program_id, parsers.unknown.UnknownParser(program_id))
         action = router.route(tx, idx)
+
         parsed_instructions.append(action)
 
-    addons_result: Dict[str, Any] = {}
+    addons = Addons()
     for addon in addon_enrichers:
-        result = addon.enrich(tx)
+        result = addon.enrich(tx, parsed_instructions)
         if result is not None:
-            addons_result[addon.addon_name] = result
+            setattr(addons, addon.addon_name, result)
 
-    return {
-        "signatures": tx.signatures,
-        "instructions": parsed_instructions,
-        "addons": addons_result,
-    }
+    return models.ParsedTransaction(
+        signatures=tx.signatures,
+        instructions=parsed_instructions,
+        addons=addons,
+    )

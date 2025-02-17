@@ -6,6 +6,7 @@ from soltxs.resolver.models import Resolve, Resolver
 
 WSOL_MINT = "So11111111111111111111111111111111111111112"
 SOL_MINT = "11111111111111111111111111111111"
+LAMPORTS_PER_SOL = 1e9
 
 
 @dataclass(slots=True)
@@ -17,19 +18,19 @@ class Raydium(Resolve):
         type: The type of swap (e.g., 'swap', 'buy', 'sell').
         who: The user account performing the swap.
         from_token: The token being sold.
-        from_amount: Amount sold (adjusted for decimals).
+        from_amount: Amount sold.
         to_token: The token being bought.
-        to_amount: Amount bought (adjusted for decimals).
-        minimum_amount_out: The minimum amount expected (adjusted for decimals).
+        to_amount: Amount bought.
+        minimum_amount_out: The minimum amount expected.
     """
 
     type: str
     who: str
     from_token: str
-    from_amount: int
+    from_amount: float
     to_token: str
-    to_amount: int
-    minimum_amount_out: int
+    to_amount: float
+    minimum_amount_out: float
 
 
 class _RaydiumResolver(Resolver):
@@ -57,15 +58,28 @@ class _RaydiumResolver(Resolver):
             elif instr.to_token in {WSOL_MINT, SOL_MINT}:
                 raydium_type = "sell"
 
+            if instr.from_token in {WSOL_MINT, SOL_MINT}:
+                resolved_from_amount = instr.from_token_amount / LAMPORTS_PER_SOL
+            else:
+                resolved_from_amount = instr.from_token_amount / 10**instr.from_token_decimals
+
+            if instr.to_token in {WSOL_MINT, SOL_MINT}:
+                resolved_to_amount = instr.to_token_amount / LAMPORTS_PER_SOL
+                resolved_minimum_amount_out = instr.minimum_amount_out / LAMPORTS_PER_SOL
+            else:
+                resolved_to_amount = instr.to_token_amount / 10**instr.to_token_decimals
+                resolved_minimum_amount_out = instr.minimum_amount_out / 10**instr.to_token_decimals
+
             return Raydium(
                 type=raydium_type,
                 who=instr.who,
                 from_token=instr.from_token,
-                from_amount=instr.from_token_amount / 10**instr.from_token_decimals,
+                from_amount=resolved_from_amount,
                 to_token=instr.to_token,
-                to_amount=instr.to_token_amount / 10**instr.to_token_decimals,
-                minimum_amount_out=instr.minimum_amount_out / 10**instr.to_token_decimals,
+                to_amount=resolved_to_amount,
+                minimum_amount_out=resolved_minimum_amount_out,
             )
+        return None
 
 
 RaydiumResolver = _RaydiumResolver()

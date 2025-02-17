@@ -22,15 +22,18 @@ def test_parsing(load_data):
     ge_tx = normalize(load_data("raydium_amm_v4_geyser.json"))
     rpc_tx = normalize(load_data("raydium_amm_v4_rpc.json"))
 
+    ge_tx.blockTime = None
+    rpc_tx.blockTime = None
+
     ge_parse = parse(ge_tx)
     rpc_parse = parse(rpc_tx)
 
     # Compare top-level fields.
-    assert ge_parse["signatures"] == rpc_parse["signatures"]
-    assert ge_parse["addons"] == rpc_parse["addons"]
+    assert ge_parse.signatures == rpc_parse.signatures
+    assert ge_parse.addons == rpc_parse.addons
 
     # Iterate over the parsed instructions.
-    for g, r in zip(ge_parse["instructions"], rpc_parse["instructions"]):
+    for g, r in zip(ge_parse.instructions, rpc_parse.instructions):
         dg = asdict(g)
         dr = asdict(r)
         assert dg == dr

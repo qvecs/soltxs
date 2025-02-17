@@ -53,9 +53,9 @@ norm_tx = soltxs.normalize(tx)
 # )
 
 parsed_data = soltxs.parse(norm_tx)
-# {
-#     "signatures": [...],
-#     "instructions": [
+# ParsedTransaction(
+#     signatures=[...],
+#     instructions=[
 #         <ComputeBudget.SetComputeUnitLimit(...)>,
 #         <ComputeBudget.SetComputeUnitPrice(...)>,
 #         <SystemProgram.CreateAccount(...)>,
@@ -65,14 +65,14 @@ parsed_data = soltxs.parse(norm_tx)
 #         <SystemProgram.Transfer(...)>,
 #         <UnknownProgram.Unknown(...)>,
 #     ],
-#     "addons": {
-#         {"compute_units": <ComputeUnits(...)>},
-#         {"instruction_count": <InstructionCount(...)>},
-#         {"loaded_addresses": <LoadedAddresses(...)>},
-#         {"platform_identifier": <PlatformIdentifier(...)>},
-#         {"token_transfer_summary": <TokenTransfer(...)>}
-#     }
-# }
+#     Addons(
+#         compute_units=<ComputeUnits(...)>,
+#         instruction_count=<InstructionCount(...)>,
+#         loaded_addresses=<LoadedAddresses(...)>
+#         platform_identifier=<PlatformIdentifier(...)>,
+#         token_transfer_summary=<TokenTransfer(...)>
+#     )
+# )
 
 resolved_tx = soltxs.resolve(parsed_data)
 # For example, a Raydium resolved output might be:

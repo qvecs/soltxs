@@ -48,6 +48,7 @@ def test_resolve_no_match():
     Ensures that if no recognized instructions exist,
     we get an unknown/empty resolution.
     """
+    from soltxs.parser.models import ParsedTransaction
     from soltxs.parser.parsers.unknown import Unknown as UnknownInstr
     from soltxs.resolver.resolvers.unknown import Unknown as UnknownResolve
 
@@ -61,6 +62,6 @@ def test_resolve_no_match():
         )
     ]
     # Build a dummy parsed_data dictionary.
-    parsed_data = {"signatures": [], "instructions": unknown_instructions, "addons": {}}
+    parsed_data = ParsedTransaction(**{"signatures": [], "instructions": unknown_instructions, "addons": {}})
     result = resolve(parsed_data)
     assert isinstance(result, UnknownResolve)
